@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Local development databases
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-shm
+*.sqlite-wal
+.local-data/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+**/dist/
+**/build/
+
+# Logs and OS files
+*.log
+.DS_Store
