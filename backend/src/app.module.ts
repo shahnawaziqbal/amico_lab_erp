@@ -53,7 +53,13 @@ import { FieldOfficersModule } from './field-officers/field-officers.module';
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
       autoLoadEntities: true,
-      database: join(__dirname, '../../database/amico_erp.sqlite'),
+      database: (() => {
+        const path = process.env.AMICO_DATABASE_PATH?.trim();
+        if (!path) {
+          throw new Error('AMICO_DATABASE_PATH must be configured');
+        }
+        return path;
+      })(),
       entities: [
         User,
         PurchaseOrder,
@@ -83,7 +89,7 @@ import { FieldOfficersModule } from './field-officers/field-officers.module';
         Product,
         FieldOfficer,
       ],
-      synchronize: true, // Critical: set to false to protect your seeded SQLite data
+      synchronize: process.env.AMICO_DB_SYNC === 'true', // Critical: set to false to protect your seeded SQLite data
     }),
     UsersModule,
     ProcurementModule,
