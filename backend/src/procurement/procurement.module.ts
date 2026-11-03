@@ -1,3 +1,6 @@
+import { UsersModule } from '../users/users.module';
+import { RbacService } from '../users/permissions/rbac.service';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
 // backend/src/procurement/procurement.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,6 +26,7 @@ import { ChartOfAccounts } from '../finance/entities/chart-of-accounts.entity';
 
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([
       Requisition,
       Rfq,
@@ -40,7 +44,7 @@ import { ChartOfAccounts } from '../finance/entities/chart-of-accounts.entity';
     PurchaseOrderController,
     QcQuarantineController,
   ],
-  providers: [
+  providers: [PermissionsGuard, RbacService,
     RequisitionService,
     RfqService,
     PurchaseOrderService,

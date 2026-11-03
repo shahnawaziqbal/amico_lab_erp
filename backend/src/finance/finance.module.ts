@@ -1,3 +1,6 @@
+import { UsersModule } from '../users/users.module';
+import { RbacService } from '../users/permissions/rbac.service';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FinanceController } from './finance.controller';
@@ -11,6 +14,7 @@ import { OverheadSalary } from './entities/overhead-salary.entity';
 
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([
       ChartOfAccounts,
       Party,
@@ -21,7 +25,7 @@ import { OverheadSalary } from './entities/overhead-salary.entity';
     ]),
   ],
   controllers: [FinanceController],
-  providers: [FinanceService],
+  providers: [PermissionsGuard, RbacService, FinanceService],
   exports: [FinanceService],
 })
 export class FinanceModule {}

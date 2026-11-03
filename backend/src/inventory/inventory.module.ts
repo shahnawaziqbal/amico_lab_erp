@@ -1,3 +1,6 @@
+import { UsersModule } from '../users/users.module';
+import { RbacService } from '../users/permissions/rbac.service';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -17,6 +20,7 @@ import { InternalReqService } from './services/internal-req.service';
 
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([
       WarehouseStock,
       InternalRequisition,
@@ -28,7 +32,7 @@ import { InternalReqService } from './services/internal-req.service';
     InventoryController,
     InternalReqController,
   ],
-  providers: [
+  providers: [PermissionsGuard, RbacService,
     InventoryService,
     InternalReqService,
   ],

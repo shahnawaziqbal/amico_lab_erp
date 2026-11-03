@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     allowedHosts: true, // Allows external public tunnel domains (pinggy, localtunnel, ngrok)
     proxy: {
+      '/auth': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,

@@ -1,3 +1,6 @@
+import { UsersModule } from '../users/users.module';
+import { RbacService } from '../users/permissions/rbac.service';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
 // hrm.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +11,7 @@ import { ChartOfAccounts } from '../finance/entities/chart-of-accounts.entity'; 
 
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([
       Employee,
       AttendanceLog,
@@ -16,7 +20,7 @@ import { ChartOfAccounts } from '../finance/entities/chart-of-accounts.entity'; 
     ]),
   ],
   controllers: [HrmController],
-  providers: [HrmService],
+  providers: [PermissionsGuard, RbacService, HrmService],
   exports: [HrmService],
 })
 export class HrmModule {}

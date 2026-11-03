@@ -18,6 +18,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document); // Accessible at http://localhost:3000/api/docs
 
-  await app.listen(3000);
+  const port = Number(process.env.PORT ?? 3000);
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65535) {
+    throw new Error('Invalid backend PORT configuration');
+  }
+  await app.listen(port);
 }
 bootstrap();

@@ -1,3 +1,6 @@
+import { UsersModule } from '../users/users.module';
+import { RbacService } from '../users/permissions/rbac.service';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductionController } from './production.controller';
@@ -7,11 +10,11 @@ import { RecipeBomMaster } from './entities/recipe-bom-master.entity';
 import { ProductionBatchMaster } from './entities/production-batch-master.entity';
 
 @Module({
-  imports: [
+  imports: [UsersModule,
     TypeOrmModule.forFeature([RecipeBomMaster, ProductionBatchMaster]),
   ],
   controllers: [ProductionController],
-  providers: [
+  providers: [PermissionsGuard, RbacService,
     ProductionService,
     QrGeneratorService, // <--- 2. Register it in providers
   ],
