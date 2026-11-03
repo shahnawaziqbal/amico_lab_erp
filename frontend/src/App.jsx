@@ -5,6 +5,7 @@ import UserManagement from './components/UserManagement';
 import AnalyticsModule from './components/AnalyticsModule';
 import ProcurementModule from './components/procurement/ProcurementModule';
 import InventoryModule from './components/inventory/InventoryModule';
+import RequisitionsModule from './components/requisitions/RequisitionsModule';
 import ProductionModule from './components/production/ProductionModule';
 import QualityModule from './components/quality/QualityModule';
 import SalesModule from './components/sales/SalesModule';
@@ -89,6 +90,7 @@ export default function App() {
     { id: 'users', label: 'User Management (RBAC)', icon: Users },
     { id: 'procurement', label: 'Procurement & Vendors', icon: ShoppingCart },
     { id: 'inventory', label: 'Raw Materials & Quarantine', icon: PackageCheck },
+    { id: 'requisitions', label: 'Requisitions', icon: FileText },
     { id: 'production', label: 'Production & BOM Batch Mgmt', icon: Factory },
     { id: 'quality', label: 'Quality Assurance (QA/QC)', icon: ShieldCheck },
     { id: 'sales', label: 'Multi-Depot Sales (Depot 1-N)', icon: Truck },
@@ -208,6 +210,8 @@ export default function App() {
           {activeTab === 'hrm' && <HrmModule />}
           {activeTab === 'maintenance' && <PlantMaintenanceModule />}
           {activeTab === 'compliance' && <ComplianceModule />}
+
+          {activeTab === 'requisitions' && <RequisitionsModule />}
           {activeTab === 'crm' && <CrmModule />}
           {activeTab === 'rnd' && <RnDModule />}
 

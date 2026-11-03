@@ -47,6 +47,8 @@ import { RmdModule } from './rmd/rmd.module';
 import { AiAnalyticsModule } from './ai-analytics/ai-analytics.module';
 import { ProductsModule } from './products/products.module';
 import { FieldOfficersModule } from './field-officers/field-officers.module';
+import { RequisitionsModule } from './requisitions/requisitions.module';
+
 
 @Module({
   imports: [
@@ -100,6 +102,7 @@ import { FieldOfficersModule } from './field-officers/field-officers.module';
     AiAnalyticsModule,
     ProductsModule,
     FieldOfficersModule,
+    RequisitionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

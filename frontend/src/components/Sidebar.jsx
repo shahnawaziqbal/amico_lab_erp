@@ -23,6 +23,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'users', label: 'User Management (RBAC)', icon: Users },
     { id: 'procurement', label: 'Procurement & Vendor Mgmt', icon: ShoppingCart },
     { id: 'inventory', label: 'Inventory & Quarantine', icon: PackageCheck },
+    { id: 'requisitions', label: 'Requisitions', icon: FileText },
     { id: 'production', label: 'Production & Batch (BOM)', icon: Factory },
     { id: 'quality', label: 'Quality Assurance (QA/QC)', icon: ShieldCheck },
     { id: 'sales', label: 'Sales & Multi-Depot Distribution', icon: Truck },
