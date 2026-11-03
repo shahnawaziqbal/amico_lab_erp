@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SecureEmployeeDirectory from './SecureEmployeeDirectory';
 import { UserPlus, Shield, Trash2, X, Lock, Check } from 'lucide-react';
 
 const MODULE_LIST = [
@@ -76,6 +77,7 @@ export default function UserManagement({ users, setUsers }) {
 
   return (
     <div className="space-y-6">
+      <SecureEmployeeDirectory />
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-xl font-bold text-white">System User Directory & RBAC</h3>

@@ -1,15 +1,17 @@
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../users/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../users/guards/permissions.guard';
+import { RequirePermissions } from '../users/guards/require-permissions.decorator';
 import { Controller, Get, Post, Param, Body } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller()
 export class SalesController {
   constructor(private readonly dataSource: DataSource) {}
 
-  @Get('api/field-officers')
-  async getFieldOfficers() {
-    return this.dataSource.query('SELECT * FROM field_officers ORDER BY teriCode ASC');
-  }
 
+  @RequirePermissions('sales.create')
   @Post('api/field-officers')
   async createFieldOfficer(@Body() dto: any) {
     const tenureMonths = Number(dto.tenureMonths) || 0;
@@ -31,12 +33,9 @@ export class SalesController {
     return { success: true, id: result?.insertId || null, message: `Field Officer registered successfully.` };
   }
 
-  @Get('api/products')
-  async getProducts() {
-    return this.dataSource.query('SELECT * FROM products ORDER BY productCode ASC');
-  }
 
   // --- UNIFIED ENDPOINT: SALES ORDERS & LEDGER SYNC ---
+  @RequirePermissions('sales.view')
   @Get('api/sales/orders')
   async getAllSalesOrders() {
     try {
@@ -84,6 +83,7 @@ export class SalesController {
     }
   }
 
+  @RequirePermissions('sales.view')
   @Get('finance/sales-orders/:id')
   async getSalesOrderById(@Param('id') id: string) {
     const orders = await this.dataSource.query(
@@ -166,6 +166,7 @@ export class SalesController {
     };
   }
 
+  @RequirePermissions('sales.create')
   @Post('finance/sales-orders')
   async createSalesOrder(@Body() dto: {
     entryNumber: string;

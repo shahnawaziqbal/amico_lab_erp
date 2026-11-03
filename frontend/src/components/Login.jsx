@@ -10,36 +10,102 @@ export default function Login({ onLoginSuccess, demoUsers = [] }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
     setError('');
+    const identifier = email.trim();
 
     try {
-      // Attempt connection to NestJS backend endpoint
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        email,
-        password,
-      });
-      
-      onLoginSuccess(response.data);
-    } catch (err) {
-      // Graceful fallback: check against dynamic App.jsx demoUsers state (synced from User Management)
-      const matchedUser = demoUsers.find(
-        (u) => u.email.trim().toLowerCase() === email.trim().toLowerCase()
+      // Keep the original quick-fill demo limited to development.
+      // Demo passwords are never accepted as real backend credentials.
+      const demoAccount = import.meta.env.DEV
+        ? demoUsers.find(account =>
+            account.email.trim().toLowerCase() ===
+            identifier.toLowerCase()
+          )
+        : null;
+
+      if (demoAccount) {
+        const expected = demoAccount.password || demoAccount.pass;
+        if (password !== expected) {
+          setError('Invalid demonstration credentials.');
+          return;
+        }
+
+        onLoginSuccess({
+          authSource: 'demo',
+          token: `demo-token-${Date.now()}`,
+          email: demoAccount.email,
+          name: demoAccount.name,
+          role: demoAccount.role,
+          permissions: demoAccount.permissions,
+        });
+        setPassword('');
+        return;
+      }
+
+      const apiBase = (
+        import.meta.env.VITE_API_BASE_URL ||
+  (['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'http://localhost:3000'
+    : window.location.origin)
+      ).replace(/\/+$/, '');
+
+      const response = await axios.post(
+        `${apiBase}/auth/login`,
+        { username: identifier, pass: password },
+        { timeout: 15000 }
       );
 
-      const validPassword = matchedUser?.password || matchedUser?.pass;
+      const jwt = response.data?.access_token;
+      const account = response.data?.user;
 
-      if (matchedUser && password === validPassword) {
-        onLoginSuccess({ 
-          token: `demo-token-${Date.now()}`, 
-          email: matchedUser.email, 
-          name: matchedUser.name,
-          role: matchedUser.role,
-          permissions: matchedUser.permissions
-        });
-      } else {
-        setError('Invalid work email or password. Select a verified profile from the quick assistant below.');
+      if (
+        typeof jwt !== 'string' || !jwt ||
+        !account || typeof account.username !== 'string'
+      ) {
+        throw new Error('Invalid backend login response');
       }
+
+      const permissionResponse = await axios.get(
+        `${apiBase}/auth/me/permissions`,
+        {
+          headers: { Authorization: `Bearer ${jwt}` },
+          timeout: 15000,
+        }
+      );
+
+      const verified = permissionResponse.data;
+
+      if (
+        !verified ||
+        verified.username !== account.username ||
+        !Array.isArray(verified.permissions) ||
+        !verified.permissions.every(
+          (code) =>
+            typeof code === 'string' &&
+            /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/.test(code)
+        )
+      ) {
+        throw new Error('Invalid verified permissions response.');
+      }
+
+      onLoginSuccess({
+        ...account,
+        authSource: 'backend',
+        token: jwt,
+        name: account.username,
+        email: account.username,
+        permissions: verified.permissions,
+      });
+      setPassword('');
+    } catch (error) {
+      setError(error?.response?.status === 401
+        ? 'Invalid ERP username or password.'
+        : error?.code === 'ERR_NETWORK'
+          ? 'Cannot connect to the ERP backend.'
+          : 'ERP login could not be completed.');
     } finally {
       setLoading(false);
     }
@@ -74,13 +140,14 @@ export default function Login({ onLoginSuccess, demoUsers = [] }) {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-2">Work Email</label>
+            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-2">Username or Work Email</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                 <Mail className="w-5 h-5" />
               </span>
               <input
-                type="email"
+                type="text"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
