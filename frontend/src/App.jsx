@@ -51,7 +51,7 @@ export default function App() {
       password: 'password123', 
       role: 'Administrator / Technical Lead', 
       status: 'Active', 
-      permissions: ['overview', 'users', 'procurement', 'inventory', 'production', 'quality', 'sales', 'finance', 'hrm', 'maintenance', 'compliance', 'crm', 'rnd', 'analytics', 'settings'] 
+      permissions: ['overview', 'users', 'procurement', 'inventory', 'production', 'quality', 'sales', 'finance', 'hrm', 'maintenance', 'compliance', 'crm', 'rnd', 'analytics', 'settings', 'requisitions'] 
     },
     {
       id: 2,
@@ -60,7 +60,7 @@ export default function App() {
       password: 'password123',
       role: 'Administrator / Executive Director',
       status: 'Active',
-      permissions: ['overview', 'users', 'procurement', 'inventory', 'production', 'quality', 'sales', 'finance', 'hrm', 'maintenance', 'compliance', 'crm', 'rnd', 'analytics', 'settings']
+      permissions: ['overview', 'users', 'procurement', 'inventory', 'production', 'quality', 'sales', 'finance', 'hrm', 'maintenance', 'compliance', 'crm', 'rnd', 'analytics', 'settings', 'requisitions']
     }
   ]);
 
@@ -78,9 +78,7 @@ export default function App() {
   const [depotFilter, setDepotFilter] = useState('Depot - Dhaka');
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-
   // ERP_SESSION_REVALIDATION_V1
-  // The backend remains the authorization authority.
   useEffect(() => {
     if (user?.authSource !== 'backend') return undefined;
 
@@ -112,10 +110,7 @@ export default function App() {
       const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(atob(normalized));
 
-      if (
-        typeof payload.exp !== 'number' ||
-        !Number.isFinite(payload.exp)
-      ) {
+      if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
         throw new Error('JWT expiration missing');
       }
 
@@ -130,18 +125,13 @@ export default function App() {
       return undefined;
     }
 
-    const expireAfter = Math.min(
-      Math.max(expiryMs - Date.now(), 0),
-      2147483647
-    );
+    const expireAfter = Math.min(Math.max(expiryMs - Date.now(), 0), 2147483647);
 
     expiryTimer = window.setTimeout(() => {
       if (expiryMs <= Date.now()) closeSession();
     }, expireAfter);
 
-    const apiBase = (
-      import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-    ).replace(/\/+$/, '');
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
     const revalidate = async () => {
       if (!active || pending) return;
@@ -153,13 +143,10 @@ export default function App() {
       pending = true;
 
       try {
-        const response = await axios.get(
-          `${apiBase}/auth/me/permissions`,
-          {
-            headers: { Authorization: `Bearer ${sessionToken}` },
-            timeout: 15000,
-          }
-        );
+        const response = await axios.get(`${apiBase}/auth/me/permissions`, {
+          headers: { Authorization: `Bearer ${sessionToken}` },
+          timeout: 15000,
+        });
 
         if (!active) return;
 
@@ -170,9 +157,7 @@ export default function App() {
           verified.username !== sessionUsername ||
           !Array.isArray(verified.permissions) ||
           !verified.permissions.every(
-            (code) =>
-              typeof code === 'string' &&
-              /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/.test(code)
+            (code) => typeof code === 'string' && /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/.test(code)
           )
         ) {
           closeSession();
@@ -180,10 +165,7 @@ export default function App() {
         }
 
         setUser((current) => {
-          if (
-            current?.authSource !== 'backend' ||
-            current.token !== sessionToken
-          ) {
+          if (current?.authSource !== 'backend' || current.token !== sessionToken) {
             return current;
           }
 
@@ -193,9 +175,7 @@ export default function App() {
           if (
             Array.isArray(oldPermissions) &&
             oldPermissions.length === nextPermissions.length &&
-            nextPermissions.every((code) =>
-              oldPermissions.includes(code)
-            )
+            nextPermissions.every((code) => oldPermissions.includes(code))
           ) {
             return current;
           }
@@ -204,10 +184,7 @@ export default function App() {
         });
       } catch (error) {
         if (!active) return;
-        if (
-          error?.response?.status === 401 ||
-          error?.response?.status === 403
-        ) {
+        if (error?.response?.status === 401 || error?.response?.status === 403) {
           closeSession();
         }
       } finally {
@@ -235,15 +212,12 @@ export default function App() {
       window.clearTimeout(expiryTimer);
       window.clearInterval(interval);
       window.removeEventListener('focus', onFocus);
-      document.removeEventListener(
-        'visibilitychange', onVisibilityChange
-      );
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [user?.authSource, user?.token, user?.username]);
 
-
   const moduleIds = [
-    'overview', 'users', 'procurement', 'inventory',
+    'overview', 'users', 'procurement', 'inventory', 'requisitions',
     'production', 'quality', 'sales', 'finance', 'hrm',
     'maintenance', 'compliance', 'crm', 'rnd',
     'analytics', 'settings',
@@ -260,7 +234,6 @@ export default function App() {
     ? activeTab
     : allowedTabs[0] || null;
 
-
   // Navigation handler supporting direct depot cross-linking across modules
   const handleNavigate = (tab, depotName) => {
     if (!allowedTabs.includes(tab)) return;
@@ -270,7 +243,6 @@ export default function App() {
     setActiveTab(tab);
   };
 
-  // If user is not authenticated, render the Login component completely standalone
   if (!user) {
     return (
       <Login 
@@ -285,17 +257,14 @@ export default function App() {
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
         <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-8">
           <h1 className="text-xl font-bold">AMICO LAB ERP</h1>
-          <p className="mt-3 text-indigo-300">
-            Signed in as {user.username}
-          </p>
+          <p className="mt-3 text-indigo-300">Signed in as {user.username}</p>
           <p className="mt-3 text-sm text-slate-400">
-            Your account has no authorized ERP modules.
-            Contact an administrator to review your assigned roles.
+            Your account has no authorized ERP modules. Contact an administrator.
           </p>
           <button
             type="button"
             onClick={() => setUser(null)}
-            className="mt-6 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold hover:bg-indigo-500"
+            className="mt-6 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold hover:bg-indigo-500 cursor-pointer"
           >
             Sign out
           </button>
@@ -380,11 +349,10 @@ export default function App() {
         <header className={`h-16 border-b ${isDarkMode ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-white/80'} backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-10 transition-colors duration-300`}>
           <h2 className={`text-sm font-semibold capitalize ${isDarkMode ? 'text-white' : 'text-slate-900'} flex items-center gap-2`}>
             <Layers className="w-4 h-4 text-indigo-500" />
-            <span>{selectedTab.replace('-', ' ')} Pharmaceutical Module</span>
+            <span>{(selectedTab || 'overview').replace('-', ' ')} Pharmaceutical Module</span>
           </h2>
 
           <div className="flex items-center gap-6">
-            {/* Central Light / Dark Mode Toggle Active Button */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all shadow-sm cursor-pointer ${
@@ -422,6 +390,7 @@ export default function App() {
           {selectedTab === 'analytics' && <AnalyticsModule />}
           {selectedTab === 'procurement' && <ProcurementModule />}
           {selectedTab === 'inventory' && <InventoryModule />}
+          {selectedTab === 'requisitions' && <RequisitionsModule />}
           {selectedTab === 'production' && <ProductionModule />}
           {selectedTab === 'quality' && <QualityModule />}
           {selectedTab === 'sales' && <SalesModule activeDepotFilter={depotFilter} onNavigate={handleNavigate} />}
@@ -431,24 +400,8 @@ export default function App() {
           {selectedTab === 'compliance' && <ComplianceModule />}
           {selectedTab === 'crm' && <CrmModule />}
           {selectedTab === 'rnd' && <RnDModule />}
-          {activeTab === 'overview' && <DashboardOverview onNavigate={handleNavigate} />}
-          {activeTab === 'users' && <UserManagement users={users} setUsers={setUsers} />}
-          {activeTab === 'analytics' && <AnalyticsModule />}
-          {activeTab === 'procurement' && <ProcurementModule />}
-          {activeTab === 'inventory' && <InventoryModule />}
-          {activeTab === 'production' && <ProductionModule />}
-          {activeTab === 'quality' && <QualityModule />}
-          {activeTab === 'sales' && <SalesModule activeDepotFilter={depotFilter} onNavigate={handleNavigate} />}
-          {activeTab === 'finance' && <FinanceModule />}
-          {activeTab === 'hrm' && <HrmModule />}
-          {activeTab === 'maintenance' && <PlantMaintenanceModule />}
-          {activeTab === 'compliance' && <ComplianceModule />}
 
-          {activeTab === 'requisitions' && <RequisitionsModule />}
-          {activeTab === 'crm' && <CrmModule />}
-          {activeTab === 'rnd' && <RnDModule />}
-
-          {/* Fallback for modules still under generic placeholder construction */}
+          {/* Fallback for settings or other modules */}
           {['settings'].includes(selectedTab) && (
             <div className={`${isDarkMode ? 'bg-slate-900/60 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'} border rounded-2xl p-12 text-center space-y-3 shadow-sm`}>
               <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-500 flex items-center justify-center mx-auto">

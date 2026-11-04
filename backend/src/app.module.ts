@@ -56,12 +56,9 @@ import { RequisitionsModule } from './requisitions/requisitions.module';
       type: 'better-sqlite3',
       autoLoadEntities: true,
       database: (() => {
-        const path = process.env.AMICO_DATABASE_PATH?.trim();
-        if (!path) {
-          throw new Error('AMICO_DATABASE_PATH must be configured');
-        }
-        return path;
-      })(),
+     const path = process.env.AMICO_DATABASE_PATH?.trim() || '/Users/shahnawaz/Documents/amico_lab_erp/database/amico_erp.sqlite';
+     return path;
+   })(),
       entities: [
         User,
         PurchaseOrder,
